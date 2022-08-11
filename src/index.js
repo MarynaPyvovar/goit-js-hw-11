@@ -25,7 +25,7 @@ const onSubmitClick = async e => {
   const data = await fetchItems(refs.input.value);
   if (data) {
     await renderGallery(data);
-    Notiflix.Notify.info(`Hooray! We found ${data.totalHits} images.`);
+    Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`);
     // await lightbox.refresh();
     const lightbox = new SimpleLightbox('.gallery a');
   }
@@ -38,6 +38,7 @@ const fetchItems = async query => {
       const responce = await axios.get(
         `${BASE_URL}/?key=${API_KEY}&q=${searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`
       );
+
       if (responce.data.total === 0) {
         Notiflix.Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
@@ -67,21 +68,21 @@ const renderGallery = async data => {
           comments,
           downloads,
         }) =>
-          `<a href="${largeImageURL}">
+          `<a href="${largeImageURL}" class="link">
       <div class="photo-card">
-  <img src="${webformatURL}" width="300" alt="${tags}" loading="lazy" />
+  <img src="${webformatURL}" width="320" heigth="210" alt="${tags}" loading="lazy" />
   <div class="info">
     <p class="info-item">
-      <b>${likes} Likes</b>
+      <b>Likes <br> <span class="info-number">${likes}</span></b>
     </p>
     <p class="info-item">
-      <b>${views} Views</b>
+      <b>Views <br> <span class="info-number">${views}</span></b>
     </p>
     <p class="info-item">
-      <b>${comments} Comments</b>
+      <b>Comments <br> <span class="info-number">${comments}</span></b>
     </p>
     <p class="info-item">
-      <b>${downloads} Downloads</b>
+      <b>Downloads <br> <span class="info-number">${downloads}</span></b>
     </p>
   </div>
 </div>
@@ -98,14 +99,15 @@ const onLoadMoreClick = async () => {
   page += 1;
   const data = await fetchItems(refs.input.value);
   await renderGallery(data);
-  totalInfo += 40;
-  console.log(totalInfo);
-  if (data.totalHits >= totalInfo) {
+
+  if (data.totalHits <= totalInfo) {
     refs.loadMoreBtn.style.display = 'none';
     Notiflix.Notify.info(
       "We're sorry, but you've reached the end of search results."
     );
+    return;
   }
+  totalInfo += 40;
 };
 
 refs.form.addEventListener('submit', onSubmitClick);
