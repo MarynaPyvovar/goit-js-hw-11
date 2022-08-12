@@ -25,8 +25,9 @@ const onSubmitClick = async e => {
   const data = await fetchItems(refs.input.value);
   if (data) {
     await renderGallery(data);
+
     Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`);
-    // await lightbox.refresh();
+
     const lightbox = new SimpleLightbox('.gallery a');
   }
 };
@@ -45,7 +46,13 @@ const fetchItems = async query => {
         );
         return;
       }
-      refs.loadMoreBtn.style.display = 'block';
+
+      if (responce.data.totalHits <= totalInfo) {
+        refs.loadMoreBtn.style.display = 'none';
+      } else {
+        refs.loadMoreBtn.style.display = 'block';
+      }
+
       return responce.data;
     } else {
       Notiflix.Notify.failure('Enter your search query.');
@@ -99,6 +106,7 @@ const onLoadMoreClick = async () => {
   page += 1;
   const data = await fetchItems(refs.input.value);
   await renderGallery(data);
+  totalInfo += 40;
 
   if (data.totalHits <= totalInfo) {
     refs.loadMoreBtn.style.display = 'none';
@@ -107,7 +115,6 @@ const onLoadMoreClick = async () => {
     );
     return;
   }
-  totalInfo += 40;
 };
 
 refs.form.addEventListener('submit', onSubmitClick);
